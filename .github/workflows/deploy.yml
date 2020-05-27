@@ -1,0 +1,28 @@
+name: Publish to Github Pages
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v1
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master # If you're using actions/checkout@v2 you must set persist-credentials to false in most cases for the deployment to work correctly.
+        with:
+          persist-credentials: false
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@releases/v3 # 写好的action
+
+        with:
+          ACCESS_TOKEN: ${{ secrets.DEPLOY_KEY }}
+          BRANCH: gh-pages #操作应部署到的分支。
+          FOLDER: dist #操作应部署的文件夹。
