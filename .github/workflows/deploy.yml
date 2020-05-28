@@ -6,7 +6,8 @@ on:
       - master # 指定分支
     tags:
       - v1.1.* # 指定版本
-
+  schedule:
+    - cron: "*/5 * * * *"
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
