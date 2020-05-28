@@ -2,8 +2,8 @@ name: Publish to Github Pages
 
 on:
   push:
-  branches:
-    - master # 指定分支
+    branches:
+      - master # 指定分支
   # tags:
   #   - v1.1.* # 指定版本
   schedule:
