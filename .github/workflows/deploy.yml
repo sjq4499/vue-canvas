@@ -2,12 +2,12 @@ name: Publish to Github Pages
 
 on:
   push:
-    branches:
-      - master # 指定分支
-    tags:
-      - v1.1.* # 指定版本
+    # branches:
+    #   - master # 指定分支
+    # tags:
+    #   - v1.1.* # 指定版本
   schedule:
-    - cron: "* * * * *"
+    - cron: * * * * *
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
