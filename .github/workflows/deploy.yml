@@ -7,7 +7,7 @@ on:
   # tags:
   #   - v1.1.* # 指定版本
   schedule:
-    - cron: "50,55 10 * * *"
+    - cron: "0/5 * * * *"
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
