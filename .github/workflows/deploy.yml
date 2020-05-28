@@ -3,9 +3,9 @@ name: Publish to Github Pages
 on:
   push:
     branches:
-      - master
+      - master # 指定分支
     tags:
-      - v1.0.3
+      - v1.*.* # 指定版本
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
