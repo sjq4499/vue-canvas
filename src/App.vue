@@ -3,7 +3,7 @@
  * @Author: sjq
  * @Date: 2020-04-28 17:13:54
  * @LastEditors: sjq
- * @LastEditTime: 2020-06-03 16:38:03
+ * @LastEditTime: 2020-06-03 18:42:20
  -->
 <template>
   <div id="app">
@@ -20,17 +20,23 @@
       width="940"
     ></canvas>
     <br />
-    <button @click="overwrite">重写</button>
-    <button @click="back">后退一步</button>
-    <button @click="downImage">下载图片</button>
+    <div class="fn-box">
+      <button @click="getPicker">取色</button>
+      <button @click="overwrite">重写</button>
+      <button @click="back">后退一步</button>
+      <button @click="downImage">下载图片</button>
+    </div>
+    <pickerColor :color.sync="color" :type="'sketch'" class="picker-color" v-if="pickerVisible"></pickerColor>
   </div>
 </template>
 
 <script>
+import pickerColor from '@/components/pickerColor'
 
 export default {
   name: 'App',
   components: {
+    pickerColor
   },
   data () {
     return {
@@ -45,10 +51,11 @@ export default {
       w: null,
       h: null,
       isDown: false,
-      color: "#fff",
+      color: "#f0f",
       linewidth: 3,
       isDraw: false, //签名标记,
-      img: ''
+      img: '',//图片
+      pickerVisible: false,//取色器显示隐藏
     }
   },
   mounted () {
@@ -75,7 +82,18 @@ export default {
   computed: {
 
   },
+  watch: {
+    color () {
+      this.canvasTxt.strokeStyle = this.color;
+      this.pickerVisible = false//颜色改变后消失
+    }
+  },
   methods: {
+    // 取色
+    getPicker () {
+      this.pickerVisible = true
+    },
+    // 下载
     downImage () {
       let canvas = document.getElementById('canvas')
       var save_url = canvas.toDataURL("image/png");
@@ -224,5 +242,8 @@ export default {
 }
 #canvas {
   border: solid 1px #000;
+}
+.fn-box button {
+  margin-right: 10px;
 }
 </style>
