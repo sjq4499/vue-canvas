@@ -3,7 +3,7 @@
  * @Author: sjq
  * @Date: 2020-04-28 17:13:54
  * @LastEditors: sjq
- * @LastEditTime: 2020-06-04 10:34:08
+ * @LastEditTime: 2020-06-04 11:08:01
  -->
 <template>
   <div id="app">
@@ -126,7 +126,6 @@ export default {
     mouseDown (ev) {
       ev = ev || event;
       ev.preventDefault();
-
       let obj = {
         x: ev.offsetX,
         y: ev.offsetY
@@ -228,8 +227,7 @@ export default {
     //移动设备事件
     touchEnd (ev) {
       ev = ev || event;
-      ev.preventDefault();
-      ev.stopPropagation()
+      // ev.preventDefault();
       console.log(ev.touches);
       if (ev.touches.length == 1) {
         let obj = {
