@@ -3,7 +3,7 @@
  * @Author: sjq
  * @Date: 2020-04-28 17:13:54
  * @LastEditors: sjq
- * @LastEditTime: 2020-06-03 18:42:20
+ * @LastEditTime: 2020-06-04 10:34:08
  -->
 <template>
   <div id="app">
@@ -23,7 +23,13 @@
     <div class="fn-box">
       <button @click="getPicker">取色</button>
       <button @click="overwrite">重写</button>
-      <button @click="back">后退一步</button>
+      <button
+        :class="item.type===brushType?'btn-action':''"
+        :key="item.type"
+        @click="setType(item.type)"
+        v-for="item in brush"
+      >{{item.name}}</button>
+      <!-- <button @click="back">后退一步</button> -->
       <button @click="downImage">下载图片</button>
     </div>
     <pickerColor :color.sync="color" :type="'sketch'" class="picker-color" v-if="pickerVisible"></pickerColor>
@@ -56,6 +62,14 @@ export default {
       isDraw: false, //签名标记,
       img: '',//图片
       pickerVisible: false,//取色器显示隐藏
+      brushType: '',
+      brush: [{
+        type: 'rect',
+        name: '矩形'
+      }, {
+        type: 'line',
+        name: '画线'
+      }]
     }
   },
   mounted () {
@@ -66,7 +80,8 @@ export default {
 
     let img = new Image()
     img.setAttribute('crossOrigin', 'anonymous');
-    img.src = 'http://cdn.puxinonline.com//dfkt/M00/22/DD/PaDqM1hQ3uiAAPrwAABfHb4f-ng003.jpg'
+    let url = 'http://cdn.puxinonline.com//dfkt/M00/22/DD/PaDqM1hQ3uiAAPrwAABfHb4f-ng003.jpg'
+    img.src = url
     img.onload = () => {
       if (img.complete) {
         canvas.setAttribute('width', img.width)
@@ -89,6 +104,10 @@ export default {
     }
   },
   methods: {
+    // 改变画笔
+    setType (type) {
+      this.brushType = type
+    },
     // 取色
     getPicker () {
       this.pickerVisible = true
@@ -130,12 +149,14 @@ export default {
         };
         this.moveY = obj.y;
         this.moveX = obj.x;
-        this.canvasTxt.moveTo(this.startX, this.startY);//移动画笔
-        this.canvasTxt.lineTo(obj.x, obj.y);//创建线条
-        this.canvasTxt.stroke();//画线
-        this.startY = obj.y;
-        this.startX = obj.x;
-        this.points.push(obj);//记录点
+        if (this.brushType === 'line') {
+          this.canvasTxt.moveTo(this.startX, this.startY);//移动画笔
+          this.canvasTxt.lineTo(obj.x, obj.y);//创建线条
+          this.canvasTxt.stroke();//画线
+          this.startY = obj.y;
+          this.startX = obj.x;
+          this.points.push(obj);//记录点
+        }
       }
     },
     //电脑设备事件
@@ -147,9 +168,14 @@ export default {
           x: ev.offsetX,
           y: ev.offsetY
         };
+        if (this.brushType === 'rect') {
+          this.canvasTxt.strokeRect(this.startX, this.startY, obj.x - this.startX, obj.y - this.startY)
+        }//画矩形
         this.canvasTxt.closePath();//收笔
-        this.points.push(obj);//记录点
-        this.points.push({ x: -1, y: -1 });
+        if (this.brushType === 'line') {
+          this.points.push(obj);//记录点
+          this.points.push({ x: -1, y: -1 });
+        }
         this.isDown = false;
       }
     },
@@ -163,9 +189,10 @@ export default {
         let obj = {
           x: ev.targetTouches[0].clientX,
           y:
-            ev.targetTouches[0].clientY -
-            (document.body.offsetHeight * 0.5 +
-              this.$refs.canvas.offsetHeight * 0.1)
+            ev.targetTouches[0].clientY
+          //  -
+          // (document.body.offsetHeight * 0.5 +
+          //   this.$refs.canvas.offsetHeight * 0.1)
         }; //y的计算值中：document.body.offsetHeight*0.5代表的是除了整个画板signatureBox剩余的高，this.$refs.canvas.offsetHeight*0.1是画板中标题的高
         this.startX = obj.x;
         this.startY = obj.y;
@@ -181,35 +208,47 @@ export default {
         let obj = {
           x: ev.targetTouches[0].clientX,
           y:
-            ev.targetTouches[0].clientY -
-            (document.body.offsetHeight * 0.5 +
-              this.$refs.canvas.offsetHeight * 0.1)
+            ev.targetTouches[0].clientY
+          // -
+          // (document.body.offsetHeight * 0.5 +
+          //   this.$refs.canvas.offsetHeight * 0.1)
         };
-        this.moveY = obj.y;
-        this.moveX = obj.x;
-        this.canvasTxt.moveTo(this.startX, this.startY);//移动画笔
-        this.canvasTxt.lineTo(obj.x, obj.y);//创建线条
-        this.canvasTxt.stroke();//画线
-        this.startY = obj.y;
-        this.startX = obj.x;
-        this.points.push(obj);//记录点
+        if (this.brushType === 'line') {
+          this.moveY = obj.y;
+          this.moveX = obj.x;
+          this.canvasTxt.moveTo(this.startX, this.startY);//移动画笔
+          this.canvasTxt.lineTo(obj.x, obj.y);//创建线条
+          this.canvasTxt.stroke();//画线
+          this.startY = obj.y;
+          this.startX = obj.x;
+          this.points.push(obj);//记录点
+        }
       }
     },
     //移动设备事件
     touchEnd (ev) {
       ev = ev || event;
       ev.preventDefault();
+      ev.stopPropagation()
+      console.log(ev.touches);
       if (ev.touches.length == 1) {
         let obj = {
           x: ev.targetTouches[0].clientX,
           y:
-            ev.targetTouches[0].clientY -
-            (document.body.offsetHeight * 0.5 +
-              this.$refs.canvas.offsetHeight * 0.1)
+            ev.targetTouches[0].clientY
+          //  -
+          // (document.body.offsetHeight * 0.5 +
+          //   this.$refs.canvas.offsetHeight * 0.1)
         };
+        console.log(this.startX, this.startY, obj.x - this.startX, obj.y - this.startY, obj);
+        if (this.brushType === 'rect') {
+          this.canvasTxt.strokeRect(this.startX, this.startY, obj.x - this.startX, obj.y - this.startY)
+        }//画矩形
         this.canvasTxt.closePath();//收笔
-        this.points.push(obj);//记录点
-        this.points.push({ x: -1, y: -1 });//记录点
+        if (this.brushType === 'line') {
+          this.points.push(obj);//记录点
+          this.points.push({ x: -1, y: -1 });//记录点
+        }
       }
     },
     //重写
@@ -245,5 +284,8 @@ export default {
 }
 .fn-box button {
   margin-right: 10px;
+}
+.btn-action {
+  color: #f0f;
 }
 </style>
